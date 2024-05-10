@@ -1,10 +1,52 @@
 from my_network import Network
-import settings
 from poi_methods import get_all_pois
 from read_from_osm import readOSMFile
 from shapely import geometry
 from osmclasses import OSMNode
 from my_network import Node, Link
+
+# osm中的道路类型字典，映射
+osm_highway_type_dict = {
+    'motorway': ('motorway', False),
+    'motorway_link': ('motorway', True),
+    'trunk': ('trunk', False),
+    'trunk_link': ('trunk', True),
+    'primary': ('primary', False),
+    'primary_link': ('primary', True),
+    'secondary': ('secondary', False),
+    'secondary_link': ('secondary', True),
+    'tertiary': ('tertiary', False),
+    'tertiary_link': ('tertiary', True),
+    'residential': ('residential', False),
+    'residential_link': ('residential', True),
+    'living_street': ('living_street', False),
+    'service': ('service', False),
+    'services': ('service', False),
+    'cycleway': ('cycleway', False),
+    'footway': ('footway', False),
+    'pedestrian': ('footway', False),
+    'steps': ('footway', False),
+    'track': ('track', False),
+    'unclassified': ('unclassified', False)
+}
+
+# 道路类型
+link_type_no_dict = {
+    'motorway': 1, 'trunk': 2, 'primary': 3, 'secondary': 4,
+    'tertiary': 5, 'residential': 6, 'living_street': 7,
+    'service': 8, 'cycleway': 9, 'footway': 10, 'track': 11,
+    'unclassified': 15, 'connector': 20, 'railway': 30, 'aeroway': 31
+}
+
+# 默认单行道标志
+default_oneway_flag_dict = {
+    'motorway': False, 'trunk': False, 'primary': False,
+    'secondary': False, 'tertiary': False,
+    'residential': False, 'living_street': False,
+    'service': False, 'cycleway': True, 'footway': True,
+    'track': True, 'unclassified': False, 'connector': False,
+    'railway': True, 'aeroway': True
+}
 
 _filter_in = {'auto': {'motor_vehicle': {'yes'},
                        'motorcar': {'yes'}},
@@ -59,7 +101,7 @@ def _createNodeOnBoundary(node_in, node_outside, network):
     line = network.bounds.intersection(geometry.LineString([node_in.geometry, node_outside.geometry]))
     lon, lat = line.coords[1]
     geometry_lonlat = geometry.Point(
-        (round(lon, settings.lonlat_coord_precision), round(lat, settings.lonlat_coord_precision)))
+        (round(lon, 7), round(lat, 7)))
     boundary_osm_node = OSMNode('', '', geometry_lonlat, True, '', '')
     boundary_osm_node.geometry_xy = network.GT.geo_from_latlon(geometry_lonlat)
     boundary_osm_node.is_crossing = True
@@ -120,8 +162,7 @@ def _createNodesAndLinks(network, link_way_list):
     """
     创建网络中的节点和链接。这个函数主要用于从OSM的way列表中创建网络中的节点和链接。
     """
-    if settings.verbose:
-        print('生成节点和道路数据')
+    print('生成节点和道路数据')
 
     link_dict = {}
     max_link_id = network.max_link_id
@@ -179,8 +220,8 @@ def preprocess_way(osmnetwork, network_types):
                 continue
 
             try:
-                way.link_type_name, way.is_link = settings.osm_highway_type_dict[way.highway]
-                way.link_type = settings.link_type_no_dict[way.link_type_name]
+                way.link_type_name, way.is_link = osm_highway_type_dict[way.highway]
+                way.link_type = link_type_no_dict[way.link_type_name]
             except KeyError:
                 continue
 
@@ -222,7 +263,7 @@ def preprocess_way(osmnetwork, network_types):
                 if way.junction in ['circular', 'roundabout']:
                     way.oneway = True
                 else:
-                    way.oneway = settings.default_oneway_flag_dict[way.link_type_name]
+                    way.oneway = default_oneway_flag_dict[way.link_type_name]
             way.link_class = 'highway'
             link_way_list.append(way)
 

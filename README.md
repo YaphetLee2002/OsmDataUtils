@@ -1,6 +1,9 @@
+## 数据处理
+位于osmtocsv，将osm文件转化为node、link、poi三个csv文件。
 ## 算法部分
 位于 **alg** 包中，**trangle_net_single.py**是单次的处理，**trangle_net_iteration.py**是多次迭代的版本  
 当前所用数据为poi_cleaned.csv。poi.csv为原始数据，两个数据集在属性上各个属性占比基本一致，区别仅为poi_cleaned.csv中删除了name为空的数据。
+
 ## TODO: 部分link_type_name标签，正在整理全部标签
 **primary**：主要道路，通常是城市、镇或村庄之间的主要连接路线。这些道路通常比次要道路宽阔，车流量也较大。  
 **secondary**：次级道路，连接城市、镇或村庄之间的次要道路，比主要道路窄一些，车流量也相对较小。  
