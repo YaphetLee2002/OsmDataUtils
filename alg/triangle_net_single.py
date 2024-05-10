@@ -4,7 +4,7 @@ from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
 
 # 读取CSV文件，并选择需要的列
-df = pd.read_csv('poi_cleaned.csv', usecols=['poi_id', 'centroid'])
+df = pd.read_csv('poi.csv', usecols=['poi_id', 'centroid'])
 
 # 提取poi_id列
 poi_ids = df['poi_id']
@@ -33,7 +33,7 @@ plt.ylabel('Normalized Y coordinate')
 plt.show()
 
 # # 设置约束条件
-constraint_distance = 0.005
+constraint_distance = 0.0015
 
 # 计算每个三角形的边长，并检查是否满足约束条件
 valid_simplices = []
@@ -51,7 +51,7 @@ for simplex in tri.simplices:
 # 绘制满足约束条件的三角网
 plt.figure(figsize=(8, 8))
 plt.triplot(points_normalized[:, 0], points_normalized[:, 1], valid_simplices, 'b-', linewidth=0.1)
-plt.plot(points_normalized[:, 0], points_normalized[:, 1], 'ko', markersize=0.1)  # 绘制归一化后的点
+scatter = plt.scatter(points_normalized[:, 0], points_normalized[:, 1], c='k', s=0.05, edgecolors='none')  # 修改点的大小
 plt.title('Constrained Delaunay Triangulation with Normalized Data')
 plt.xlabel('Normalized X coordinate')
 plt.ylabel('Normalized Y coordinate')
