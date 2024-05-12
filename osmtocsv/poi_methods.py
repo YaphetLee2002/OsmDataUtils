@@ -1,5 +1,5 @@
 from my_network import POI
-from osmclasses import Way
+from osmclasses import WayInOsm
 from process_geo_information import get_polygon_from_nodes
 from shapely import geometry
 
@@ -47,7 +47,7 @@ def get_poi_from_relation(POI_relation_list, net_bound):
         for m in range(number_of_members):
             member = relation.member_list[m]
             role = relation.member_role_list[m]
-            if isinstance(member, Way):
+            if isinstance(member, WayInOsm):
                 if role != 'outer': continue
                 if m_ref_node_list:
                     combined_ref_node_list = []

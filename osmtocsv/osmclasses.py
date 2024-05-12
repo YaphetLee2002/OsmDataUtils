@@ -1,6 +1,6 @@
-# osm数据类的定义，根据osm提供
+# osm数据类的定义
 
-class OSMNode:
+class NodeInOsm:
     def __init__(self, osm_node_name, osm_node_id, geometry, in_region, osm_highway, ctrl_type):
         self.name = osm_node_name
         self.osm_node_id = osm_node_id
@@ -10,13 +10,11 @@ class OSMNode:
         self.ctrl_type = ctrl_type
         self.in_region = in_region
         self.is_crossing = False
-
         self.node = None
-
         self.usage_count = 0
 
 
-class Way:
+class WayInOsm:
     def __init__(self):
         self.osm_way_id = None
         self.highway = None
@@ -35,7 +33,6 @@ class Way:
         self.turn_lanes_backward = None
         self.maxspeed = None
         self.oneway = None
-
         self.junction = None
         self.area = None
         self.motor_vehicle = None
@@ -50,7 +47,6 @@ class Way:
         self.way_poi = None
         self.allowable_agent_type_list = []
         self.allowed_uses = []
-
         self.is_reversed = False
         self.is_cycle = False
         self.is_pure_cycle = False
@@ -77,7 +73,7 @@ class Way:
             if idx == number_of_ref_nodes-1: break
 
 
-class Relation:
+class RelationInOsm:
     def __init__(self):
         self.osm_relation_id = None
         self.member_id_list = []
@@ -90,15 +86,13 @@ class Relation:
         self.leisure = None
 
 
-class OSMNetwork:
+class NetworkInOsm:
     def __init__(self):
         self.osm_node_dict = {}
         self.osm_way_dict = {}
         self.osm_relation_list = []
-
         self.link_way_list = []
         self.POI_way_list = []
-
         self.bounds = None
         self.GT = None
 

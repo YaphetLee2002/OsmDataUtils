@@ -29,7 +29,7 @@ class Node:
 
         self.movement_list = []
 
-    def buildFromOSMNode(self, osmnode):
+    def generate_from_osmnode(self, osmnode):
         self.name = osmnode.name
         self.osm_node_id = osmnode.osm_node_id
         self.osm_highway = osmnode.osm_highway
@@ -68,7 +68,7 @@ class Link:
 
         self.segment_list = []
 
-    def buildFromOSMWay(self, way, direction, ref_node_list, default_lanes, default_speed, default_capacity):
+    def generate_from_osmway(self, way, direction, ref_node_list, default_lanes, default_speed, default_capacity):
         self.osm_way_id = way.osm_way_id
         self.name = way.name
         self.link_class = way.link_class

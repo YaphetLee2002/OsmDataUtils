@@ -1,4 +1,4 @@
-from osmclasses import OSMNode, Way, Relation, OSMNetwork
+from osmclasses import NodeInOsm, WayInOsm, RelationInOsm, NetworkInOsm
 from process_geo_information import from_latlon
 from process_geo_information import GeoTransformer
 from shapely import geometry
@@ -7,23 +7,9 @@ import osmium
 import re
 
 
-class NWRHandler(osmium.SimpleHandler):
-    """
-    从osmium.SimpleHandler派生的类
-    处理OSM文件中的节点（Node）、道路（Way）和关系（Relation）数据
-    是解析OSM文件，并将解析的结果存储在类的属性中
-    """
-    """
-    关于SimpleHandler：
-    最通用的OSM数据处理程序。从此类派生您的数据处理器，并为您感兴趣的每个对象类型实现回调。可识别以下数据类型：
-    节点、方式、关系、区域和变更集
-    回调只接受一个参数，即对象。请注意，交给处理程序的所有对象都只能读取，并且只有在回调结束时才有效。任何应该保留的数据都必须复制到其他数据结构中。
-    """
-
+class MyHandler(osmium.SimpleHandler):
     def __init__(self):
         osmium.SimpleHandler.__init__(self)
-
-        # self.bounds = None
 
         self.osm_node_dict = {}
         self.osm_node_id_list = []
@@ -42,7 +28,7 @@ class NWRHandler(osmium.SimpleHandler):
         osm_highway = n.tags.get('highway')
         ctrl_type = 'signal' if (osm_highway is not None) and 'signal' in osm_highway else None
 
-        node = OSMNode(osm_node_name, osm_node_id, node_geometry, in_region, osm_highway, ctrl_type)
+        node = NodeInOsm(osm_node_name, osm_node_id, node_geometry, in_region, osm_highway, ctrl_type)
         self.osm_node_dict[node.osm_node_id] = node
 
         self.osm_node_id_list.append(osm_node_id)
@@ -50,7 +36,7 @@ class NWRHandler(osmium.SimpleHandler):
         del n
 
     def way(self, w):
-        way = Way()
+        way = WayInOsm()
         way.osm_way_id = str(w.id)
         way.ref_node_id_list = [str(node.ref) for node in w.nodes]
 
@@ -117,7 +103,7 @@ class NWRHandler(osmium.SimpleHandler):
         del w
 
     def relation(self, r):
-        relation = Relation()
+        relation = RelationInOsm()
         relation.osm_relation_id = str(r.id)
 
         relation.building = r.tags.get('building')
@@ -144,7 +130,7 @@ class NWRHandler(osmium.SimpleHandler):
         del r
 
 
-def _processNodes(net, h):
+def get_nodes(net, h):
     coord_array = np.array(h.osm_node_coord_list)
     central_lon, central_lat = np.mean(coord_array, axis=0)
     central_lon, central_lat = float(central_lon), float(central_lat)
@@ -159,13 +145,13 @@ def _processNodes(net, h):
     net.GT = GeoTransformer(central_lon, central_lat, northern)
 
 
-def _processWays(net, h):
+def get_ways(net, h):
     for osm_way_id, osm_way in h.osm_way_dict.items():
         osm_way.ref_node_list = [net.osm_node_dict[ref_node_id] for ref_node_id in osm_way.ref_node_id_list]
         net.osm_way_dict[osm_way_id] = osm_way
 
 
-def _processRelations(net, h):
+def get_relations(net, h):
     for relation in h.relation_list:
         valid = True
         for member_no, member_id in enumerate(relation.member_id_list):
@@ -182,9 +168,9 @@ def _processRelations(net, h):
 
 
 # used by getNetFromFile
-def readOSMFile(filename):
+def get_osm_network(filename):
     print('读取OSM文件信息')
-    osmnet = OSMNetwork()
+    osmnet = NetworkInOsm()
     f = osmium.io.Reader(filename)
     header = f.header()
     box = header.box()
@@ -193,11 +179,11 @@ def readOSMFile(filename):
     minlat, minlon = bottom_left.lat, bottom_left.lon
     maxlat, maxlon = top_right.lat, top_right.lon
     osmnet.bounds = geometry.Polygon([(minlon, maxlat), (maxlon, maxlat), (maxlon, minlat), (minlon, minlat)])
-    h = NWRHandler()
+    h = MyHandler()
     h.bounds = osmnet.bounds
     h.apply_file(filename)
 
-    _processNodes(osmnet, h)
-    _processWays(osmnet, h)
-    _processRelations(osmnet, h)
+    get_nodes(osmnet, h)
+    get_ways(osmnet, h)
+    get_relations(osmnet, h)
     return osmnet

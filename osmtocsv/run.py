@@ -1,7 +1,9 @@
-from build_net import get_network
+from build_net import build_network
 from shapely import wkt
 import csv
 import os
+
+from get_from_osm import get_osm_network
 
 
 def output_node(network, output_folder, node_filename):
@@ -75,7 +77,9 @@ def output_poi(network, output_folder, poi_filename):
 
 
 if __name__ == '__main__':
-    net = get_network("osm_data/Beijing.osm")
+    osmnetwork = get_osm_network("osm_data/Beijing.osm")
+    net = build_network(osmnetwork)
+    print(f'生成节点：{len(net.node_dict)}个，生成路径：{len(net.link_dict)}条，生成poi：{len(net.POI_list)}个')
 
     print('输出数据集的csv文件')
 
